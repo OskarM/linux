@@ -37,3 +37,30 @@ asmlinkage long sys_arm_fadvise64_64(int fd, int advice,
 {
 	return sys_fadvise64_64(fd, offset, len, advice);
 }
+
+/*
+ * Get information about the number of processes, pending signals and
+ * file descriptors currently watched by the user.
+ */
+asmlinkage long sys_userinfo(char *user, size_t len)
+{ 
+	struct user_struct *userinfo;
+
+	if ((userinfo = get_current_user()) != NULL) 
+	{
+		printk(KERN_ALERT "Processes: %d\n", atomic_read(&userinfo->processes));
+		printk(KERN_ALERT "Signals: %d\n", atomic_read(&userinfo->sigpending));
+		printk(KERN_ALERT "Open files: %d\n", atomic_read(&userinfo->inotify_watches));
+		
+		return 0;
+
+	} else {
+		printk(KERN_ALERT "Unable to get user information\n");
+
+		return -1;
+	}
+
+	//printk(KERN_ALERT "Hello from userinfo call\n");
+	//return 0;
+	
+}
