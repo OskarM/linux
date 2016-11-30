@@ -42,25 +42,41 @@ asmlinkage long sys_arm_fadvise64_64(int fd, int advice,
  * Get information about the number of processes, pending signals and
  * file descriptors currently watched by the user.
  */
-asmlinkage long sys_userinfo(char *user, size_t len)
+asmlinkage long sys_userinfo(int *processes, int *signals, int *open_files)
 { 
 	struct user_struct *userinfo;
+	int errno = 0;
 
+	/* Check user space memory allocation and correct information retrieval */
 	if ((userinfo = get_current_user()) != NULL) 
 	{
-		printk(KERN_ALERT "Processes: %d\n", atomic_read(&userinfo->processes));
-		printk(KERN_ALERT "Signals: %d\n", atomic_read(&userinfo->sigpending));
-		printk(KERN_ALERT "Open files: %d\n", atomic_read(&userinfo->inotify_watches));
-		
-		return 0;
+		int p = atomic_read(&userinfo->processes);
+		int s = atomic_read(&userinfo->sigpending);
+		int f = atomic_read(&userinfo->inotify_watches);
 
+		printk(KERN_ALERT "Processes: %d\n", atomic_read(&userinfo->processes));
+		printk(KERN_ALERT "Signals: %d\n", atomic_read(&userinfoo->sigpending));
+		printk(KERN_ALERT "Open files: %d\n", atomic_read(&userinfo->inotify_watches));
+
+		if (copy_to_user(processes, &p, sizeof(int)))
+		{
+			errno = -EFAULT;
+		}
+		else if (copy_to_user(signals, &s, sizeof(int))) 
+		{
+			errno = -EFAULT;
+		}
+		else if (copy_to_user(open_files, &f, sizeof(int)))
+		{
+			errno =  -EFAULT;
+		}
+
+		
 	} else {
 		printk(KERN_ALERT "Unable to get user information\n");
-
-		return -1;
+		errno = -1;
 	}
 
-	//printk(KERN_ALERT "Hello from userinfo call\n");
-	//return 0;
-	
+	return errno;
+
 }
