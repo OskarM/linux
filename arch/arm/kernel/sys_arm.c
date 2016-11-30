@@ -55,7 +55,7 @@ asmlinkage long sys_userinfo(int *processes, int *signals, int *open_files)
 		int f = atomic_read(&userinfo->inotify_watches);
 
 		printk(KERN_ALERT "Processes: %d\n", atomic_read(&userinfo->processes));
-		printk(KERN_ALERT "Signals: %d\n", atomic_read(&userinfoo->sigpending));
+		printk(KERN_ALERT "Signals: %d\n", atomic_read(&userinfo->sigpending));
 		printk(KERN_ALERT "Open files: %d\n", atomic_read(&userinfo->inotify_watches));
 
 		if (copy_to_user(processes, &p, sizeof(int)))
