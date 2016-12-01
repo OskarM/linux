@@ -50,27 +50,18 @@ asmlinkage long sys_userinfo(int *processes, int *signals, int *open_files)
 	/* Check user space memory allocation and correct information retrieval */
 	if ((userinfo = get_current_user()) != NULL) 
 	{
-		int p = atomic_read(&userinfo->processes);
-		int s = atomic_read(&userinfo->sigpending);
-		int f = atomic_read(&userinfo->inotify_watches);
+		int procs = atomic_read(&userinfo->processes);
+		int sigs = atomic_read(&userinfo->sigpending);
+		int files = atomic_read(&userinfo->inotify_watches);
 
-		printk(KERN_ALERT "Processes: %d\n", atomic_read(&userinfo->processes));
-		printk(KERN_ALERT "Signals: %d\n", atomic_read(&userinfoo->sigpending));
-		printk(KERN_ALERT "Open files: %d\n", atomic_read(&userinfo->inotify_watches));
-
-		if (copy_to_user(processes, &p, sizeof(int)))
+		if (  (copy_to_user(processes, &procs, sizeof(int)) == 0) 
+		   || (copy_to_user(signals, &sigs, sizeof(int)) == 0)
+		   || (copy_to_user(open_files, &files, sizeof(int)) == 0))
 		{
 			errno = -EFAULT;
 		}
-		else if (copy_to_user(signals, &s, sizeof(int))) 
-		{
-			errno = -EFAULT;
-		}
-		else if (copy_to_user(open_files, &f, sizeof(int)))
-		{
-			errno =  -EFAULT;
-		}
 
+		free(userinfo);
 		
 	} else {
 		printk(KERN_ALERT "Unable to get user information\n");
