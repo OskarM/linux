@@ -60,8 +60,6 @@ asmlinkage long sys_userinfo(int *processes, int *signals, int *open_files)
 		{
 			errno = -EFAULT;
 		}
-
-		free(userinfo);
 		
 	} else {
 		printk(KERN_ALERT "Unable to get user information\n");
